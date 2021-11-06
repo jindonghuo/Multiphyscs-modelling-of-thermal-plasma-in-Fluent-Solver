@@ -17,14 +17,14 @@ This code project is for the mulitphyscis modelling of thermal plasma, as the se
 * Heat transfer and Thermal radiation based on DOM method
 * 3D transient simulaiton
 
-## Requirement
+## Requirements
 * Please ensure you have properly installed Fluent and python 3 in your platform.
 * In windows, it needs the C compiler installed. 
 * In windows, modify the environment by clicking C:\Program Files\ANSYS Inc\v211\fluent\ntbin\win64\setenv.exe 
 * In linux, please export gcc as compiler
 * The author suggests shared-memory for parallel computing (single node/cpu with multiple cores)
 
-## Executing program
+## Executing 
 * Create your geometry mesh in whatever format that can be read by Fluent, then open by fluent, modify the python_script.py file and replace the cell zone and boundary names
 * Then save the mesh file into geometry_mesh.cas, and put this file into src_resources folder
 * Test the code by running 3 steps: like /solve/dual-time-iterate 2 30, which means run 2 steps and each step with maximum 30 iterations
