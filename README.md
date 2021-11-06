@@ -5,7 +5,8 @@ This code can run in both Windows or Linux. This is script based modelling, with
 * The UDF code is parallized
 * The python script first check the platform, Linux or Windoes, then write the Fluent journal file, and then run fluent journal file.
 * The fluent journal file will read the mesh, compile UDF, import the gas properties data and finally submit the fluent job.
-* During the running, the script will export the simulation results, like current denstiy distribution contour, at end of each timestep.
+* During the running, the script will export the simulation results as figures, like current denstiy distribution contour, at end of each timestep.
+* After the job is done, combine the results figure into a video by running video_from_image.py
 
 ## Physcial process
 This code project is for the mulitphyscis modelling of thermal plasma, as the secondery development for Fluent Solver, which includes the following physcis
