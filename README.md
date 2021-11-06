@@ -7,15 +7,15 @@ This code can run in both Windows or Linux. This is script based modelling, with
 * The fluent journal file will read the meah, compile UDF, import the gas properties data and finally submit the fluent job.
 * During the running, the script will export the simulation results, like current denstiy distribution contour, at end of each timestep.
 
-
+## Physcial process
 This code project is for the mulitphyscis modelling of thermal plasma, as the secondery development for Fluent Solver, which includes the following physcis
-
 
 * Assumed fully ionizated plasma in both local thermodybnamics and chemcial equilbrium. 
 * Gas dynamics
 * Electromagnetics field: charge conservation equation + magnetic vector possion equation
 * Surface chemical reaction and Species tranprot
 * Heat transfer and Thermal radiation based on DOM method
+* 3D transient simulaiton
 
 ## Requirement
 * Please ensure you have properly installed Fluent and python 3 in your platform.
