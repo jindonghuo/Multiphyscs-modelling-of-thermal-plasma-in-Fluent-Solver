@@ -1,4 +1,4 @@
-# Multiphyscs-modelling-of-thermal-plasma-in-Fluent-Solver
+# Multiphyscs modelling of thermal plasma: Scripting + Fluent Solver + UDF
 
 ## Description
 This code can run in both Windows or Linux. This is script based modelling, without GUI, to have effecient debugging and parameter study.
