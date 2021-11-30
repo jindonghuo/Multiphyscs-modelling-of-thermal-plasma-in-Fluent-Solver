@@ -11,7 +11,7 @@ This code can run in both Windows or Linux. This is script based modelling, with
 ## Physcial process
 This project is for the mulitphyscis modelling of thermal plasma, as the secondery development for Fluent Solver, which includes the following physcis
 
-* Assumption: Fully ionizated plasma in both local thermodybnamic and chemcial equilbrium. 
+* Assumption: Fully ionizated plasma in both local thermodynamic and chemcial equilbrium. 
 * Gas dynamics
 * Electromagnetics field: charge conservation equation + magnetic vector poisson equation
 * Surface chemical reaction and Species tranprot
