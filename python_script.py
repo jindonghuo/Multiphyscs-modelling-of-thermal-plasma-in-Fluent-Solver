@@ -1009,6 +1009,31 @@ elif sys.platform.startswith('linux'):
     job = out.strip().split()[-1]   # this is the current jobID
     print ('\n The '+sbatchfilename+' with jobID '+ str(job).strip(r'b\'')+' has been submitted. \n')
 
+    while True:
+        prefixed = [file for file in os.listdir('.') if file.startswith("output_fluent_")]
+        if prefixed: break 
+        time.sleep(0.1)
+    #
+    print(' File:'+prefixed[0]+' will be opened and printed on the screen...')
+    time.sleep(2)    
+    outputs=open(prefixed[0],'r')
+    def readflow(filename):
+        filename.seek(0,2)            # read the file from the tail
+        while True:
+            line = filename.readline()
+            if not line:
+                time.sleep(0.1)
+                continue
+            yield line                # this is very tricky
+    lines=readflow(outputs)
+    for line in lines:  
+        line=line.rstrip()
+        if line: print(line)          # end default is /n, which will cause am empty line. if the line is empty, line is false
+        if 'Termination' in line or 'Error' in line or 'CANCELLED' in line:   
+            print("\n Fluent Job is done or Error or CANCELLED. Please check it!")
+            break
+    outputs.close()        
+    time.sleep(1)       
 else:
     print ('\n Unable to check the operation system, exit soon...')
     time.sleep(1)  
