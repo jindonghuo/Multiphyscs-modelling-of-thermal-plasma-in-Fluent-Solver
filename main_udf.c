@@ -8,7 +8,8 @@
 
 /* this file is created by Jindong, huojindong@gmail.com */
 /* (rpsetvar 'uds/diffusion-long? #t)     */
-#if RP_DOUBLE              /*  This aims to define format */
+/*  Below aims to define format */
+#if RP_DOUBLE              
 #  define REAL_FMT "%le"
 #  define INT_FMT "%d"
 #else
