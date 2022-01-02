@@ -1038,7 +1038,6 @@ else:
     print ('\n Unable to check the operation system, exit soon...')
     time.sleep(1)  
     sys.exit()
-
 time.sleep(1)
 
 
@@ -1047,20 +1046,12 @@ os.remove('*./.sh')
 os.remove(udf_c_code2)
 os.remove(udf_h_code1)
 '''
-
+# if there is any problem, email huojindong@gmail.com
 
 timeseconds2 = time.time() - start_time
 hour   = int(timeseconds2/3600)
 minute = int((timeseconds2-hour*3600)/60)
 second = int(timeseconds2-3600*hour-60*minute)
 print ('\n Fluent job totally takes : %02d:%02d:%02d time. \n'  %(hour, minute, second))
-#input ('\n Press anykey to exit...')
+input ('\n Press anykey to exit...')
 sys.exit()
-
-
-'''
-
-e4_V12.06.0_2.22.6_J5e3_6e4_1e5
-
-
-'''
