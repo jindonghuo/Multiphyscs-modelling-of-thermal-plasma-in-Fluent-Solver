@@ -33,7 +33,7 @@ print('This vide output is sucessful!')
 print ('It totally takes {0:f} seconds. \n'.format(time.time() - start_time))
 sys.exit()
 
-# imshow() is the function that displays the image on the screen.
+
 # cap.read() returns a bool. If frame is read correctly, it will be True.
 # The function to read from an image into OpenCv is imread().
 # imshow() is the function that displays the image on the screen.
