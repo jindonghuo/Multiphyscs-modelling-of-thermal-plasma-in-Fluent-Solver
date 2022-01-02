@@ -1032,11 +1032,9 @@ elif sys.platform.startswith('linux'):
         if 'Termination' in line or 'Error' in line or 'CANCELLED' in line:   
             print("\n Fluent Job is done or Error or CANCELLED. Please check it!")
             break
-    outputs.close()        
-    time.sleep(1)       
+    outputs.close()           
 else:
     print ('\n Unable to check the operation system, exit soon...')
-    time.sleep(1)  
     sys.exit()
 time.sleep(1)
 
