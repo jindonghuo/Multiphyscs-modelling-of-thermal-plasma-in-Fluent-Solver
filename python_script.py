@@ -1043,9 +1043,7 @@ time.sleep(1)
 
 
 '''
-os.remove(ge_table1)
-os.remove(ge_table2)
-os.remove(ge_table3)
+os.remove('*./.sh')
 os.remove(udf_c_code2)
 os.remove(udf_h_code1)
 '''
