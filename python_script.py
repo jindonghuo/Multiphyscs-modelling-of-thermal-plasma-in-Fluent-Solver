@@ -455,8 +455,8 @@ f.write('                                                \n') #
 
 #
 #f.write('/define/operating-conditions/gravity no                                \n')
-f.write('/define/operating-conditions/gravity yes 0.0 -20.0 0.0                  \n')
-f.write('/define/operating-conditions/operating-density? yes 1.23                \n')  # warning: for compressible (ideal and real) gas models with buoyancy, it is recommended to use a specified operating density value of zero.
+f.write('/define/operating-conditions/gravity yes 0.0 -10.0 0.0                  \n')
+f.write('/define/operating-conditions/operating-density? yes 0.0                \n')  # or 1.23 warning: for compressible (ideal and real) gas models with buoyancy, it is recommended to use a specified operating density value of zero.
 f.write('/define/operating-conditions/operating-pressure 101325.                 \n')
 #
 f.write('/define/operating-conditions/reference-pressure-location 0. 0. 0.       \n')  # If pressure boundaries are involved, this will be ignored
