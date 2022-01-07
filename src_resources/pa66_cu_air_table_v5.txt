@@ -8,4 +8,4 @@
      0 0     300         3    0.00186841          1.00992  1.96042e-005      0.0287163            1e-020        28.8914 
      0 0     300         4    0.00186841          1.00992  1.96042e-005      0.0287163            1e-020        28.8914 
      0 0     300         5    0.00186841          1.00992  1.96042e-005      0.0287163            1e-020        28.8914 
-// this just provide a format. please find the properties data from decent source
+// this just provides a format. please find the properties data from decent source
