@@ -16,7 +16,7 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * Electromagnetics field: charge conservation equation + magnetic vector poisson equation
 * Surface chemical reaction and Species tranprot
 * Heat transfer and Thermal radiation based on DOM method
-* 3D transient simulaiton
+* 3D transient
 
 ## Requirements
 * Please ensure you have properly installed Fluent and python 3 in your platform.
@@ -26,12 +26,12 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * The author suggests shared-memory for parallel computing (single node/cpu with multiple cores)
 
 ## Executing 
-* Create your geometry mesh in whatever format that can be read by Fluent (msh or cas), then open it by fluent, check the cell zone or surface name/ID
+* Create your geometry mesh in whatever format that can be read by Fluent, then open it by fluent, check the cell zone or surface name/ID
 * modify the python_script.py file and replace the cell zone and boundary names 
 * Then save the fluent file into geometry_mesh.cas, and put this file into src_resources folder
 * Test the code by running a few time-steps: like /solve/dual-time-iterate 2 30, which means run 2 steps and each step with maximum 30 iterations
 * If initialization works well, then run it for more time-steps
-* In summary, the one commond to run the whole simualtion is: **$python python_script.py** in both linux and windows
+* In summary, the one commond to run the whole simualtion is: **$python python_script.py**  in both linux and windows
 
 ## Authors
 Jindong Huo
