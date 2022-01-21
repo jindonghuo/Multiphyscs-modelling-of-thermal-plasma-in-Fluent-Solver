@@ -38,7 +38,7 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * If initialization works well, then run it for more time-steps
 * In summary, the one commond to run the whole simualtion in both linux and windows is:
 
-**$ python python_script.py**
+  **$ python python_script.py**
 
 ## Authors
 Jindong Huo
