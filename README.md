@@ -1,6 +1,9 @@
 # Multiphyscs modelling of thermal plasma: Scripting + Fluent Solver + UDF
 
-This is for equilibrium modelling of plasma, and plasma-solid interaction. For non-equilibrium modelling, please see this paper: https://iopscience.iop.org/article/10.1088/1361-6463/abc64b/meta
+* This method has been used for publication: https://aip.scitation.org/doi/10.1063/5.0012159
+* For thermal non-equilibrium , additional electron energy equation is needed to solve electron temperature which is different from heavy particles temperature. 
+* For chemical non-equilibrium, additional species transport equations are needed to capture the medium gas dissociation/ionization (normally for elementary gas like argon, nitrogn).
+
 ## Description
 This project can run in both Windows or Linux. It is script based modelling, instead of GUI, to have an effecient debugging as well as parameter study/optimization. Debugging for Physics-based modelling requires calibration from experimental results, not just the Syntax issues. The scripting-based modelling should be run in batch mode to accelerate the whole modelling process.
 * The UDF code is parallized.
