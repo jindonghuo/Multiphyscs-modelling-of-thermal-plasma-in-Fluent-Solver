@@ -1,4 +1,4 @@
-Average absorption coefficient, 1/m, Cu 100%, 6 bands P1 model
+Average absorption coefficient, 1/m, Cu 100%, 6 bands 
 temperature,K               pressure,atm                Lambda(nm) 10-85            85-102                      102-113                     113-180                     180-1200                    1200-4500                   
 300                         1                           9768.7320783018             950.800543433807            155.10630477714             64.1358801599406            0.0001                      0.0001                      
 600                         1                           7563.90194595119            586.88336910795             101.292386375504            41.8952038630826            0.0001                      0.0001                      
