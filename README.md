@@ -40,5 +40,5 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 
   **$ python python_script.py**
 
-## Authors
-Jindong Huo
+## Contributor
+Jindong Huo 
