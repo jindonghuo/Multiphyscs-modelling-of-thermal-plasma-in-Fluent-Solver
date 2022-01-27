@@ -1,5 +1,10 @@
 # Multiphyscs modelling of thermal plasma: Scripting + Fluent Solver + UDF
 
+
+## Contributor
+Jindong Huo, independent contributor
+
+## Reference
 * This method has been used for publication: https://aip.scitation.org/doi/10.1063/5.0012159
 * For thermal non-equilibrium , additional electron energy equation is needed to solve electron temperature which is different from heavy particles temperature. 
 * For chemical non-equilibrium, additional species transport equations are needed to capture the medium gas dissociation/ionization (normally for elementary gas like argon, nitrogn).
@@ -39,6 +44,3 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * In summary, the one commond to run the whole simualtion in both linux and windows is:
 
   **$ python python_script.py**
-
-## Contributor
-Jindong Huo, independent contributor
