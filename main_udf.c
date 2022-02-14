@@ -191,7 +191,7 @@ k1_V97_0.01_1.8_2.2_J5e3_4e4_8e4_4g
 
 */
 
-double Cathode_Drop(double j)
+double Cathode_Drop(const double j)
 {
   double Vc0=VdropC*0.2;
   double Vc_ig=VdropC*2.2;
@@ -210,7 +210,7 @@ double Cathode_Drop(double j)
   	return (Vc_ig-VdropC) * exp(-pow(j-jc_ig,2)/c2) + VdropC;
 }
 
-double Anode_Drop(double j)
+double Anode_Drop(const double j)
 {
   double Va0=VdropA*0.2;
   double Va_ig=VdropA*3.1;
@@ -237,7 +237,7 @@ double GetArcSpotRadius(double PowerIn, double EvapRate)
 }
 
 /* Interpolation. based on u inpt, find it position i in x[], we try to find the y[i] value by interpolating as the output */
-double interp(double xx[], double yy[], int n, double input)
+double interp(const double xx[], const double yy[], const int n, const double input)
 {
   if(input >= xx[n-1])
   	   return yy[n-1];
