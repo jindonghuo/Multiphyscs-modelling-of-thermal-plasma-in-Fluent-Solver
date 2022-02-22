@@ -33,7 +33,7 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * In windows, it needs the C compiler installed. It seems latest ANSYS Fluent has in-built compiler, thus no additional compiler is needed. 
 * In windows, modify the environment by clicking C:\Program Files\ANSYS Inc\v211\fluent\ntbin\win64\setenv.exe to add fluent to PATH 
 * In linux, please export gcc as compiler
-* The author suggests shared-memory for parallel computing (single node/cpu with multiple cores)
+* The author suggests shared-memory for parallel computing (single node/cpu with multiple cores/threads)
 
 ## Executing 
 * Create your geometry mesh in whatever format that can be read by Fluent, then open it by fluent, check the cell zone or surface name/ID
