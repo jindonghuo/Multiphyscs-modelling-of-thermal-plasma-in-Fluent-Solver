@@ -11,7 +11,7 @@ Jindong Huo, independent contributor
 
 ## Description
 This project can run in both Windows or Linux. It is script based modelling, instead of GUI, to have an effecient debugging as well as parameter study/optimization. Debugging for Physics-based modelling requires calibration from experimental results, not just the Syntax issues. The scripting-based modelling should be run in batch mode to accelerate the whole modelling process.
-* The UDF code is parallized.
+* The UDF code, main_udf.c, is parallized.
 * The python script first checks the platform, Linux or Windoes, then writes the Fluent journal file, and then run fluent journal file to compile UDF and setup the model.
 * The fluent journal file will read the mesh, load UDF, import/interpolate the gas transport/thermodynamic properties and finally submit the fluent job.
 * During the running, the script will export the simulation results as figures, like current denstiy, temperature and potential field, at end of each timestep.
