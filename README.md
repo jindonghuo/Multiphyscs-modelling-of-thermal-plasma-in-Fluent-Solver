@@ -6,7 +6,7 @@ Jindong Huo, independent contributor
 
 ## Reference
 * This method has been used for publication: https://aip.scitation.org/doi/10.1063/5.0012159
-* For thermal non-equilibrium , additional electron energy equation is needed to solve electron temperature which is different from heavy particles temperature. 
+* For thermally non-equilibrium state, additional electron energy equation is needed to solve electron temperature which is different from heavy particles temperature. 
 * For chemical non-equilibrium, additional species transport equations are needed to capture the gas dissociation/ionization process (normally for argon, nitrogn, not for air because air has too many reaction species).
 
 ## Description
