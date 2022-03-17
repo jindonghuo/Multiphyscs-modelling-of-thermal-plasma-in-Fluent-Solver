@@ -229,7 +229,7 @@ double Anode_Drop(const double j)
   	return (Va_ig-VdropA)*exp(-pow(j-ja_ig,2)/a2) + VdropA;
 }
 
-double GetArcSpotRadius(double PowerIn, double EvapRate)
+double GetArcSpotRadius(const double PowerIn, const double EvapRate)
 {
 	 double arc_radius;
 	 arc_radius = sqrt(pow(thermalcond_cu*(TempBoilCu-TempAmbient)/EvapRate/h_cu_mole, 2) + PowerIn/(EvapRate*h_cu_mole*M_PI))-thermalcond_cu*(TempBoilCu-TempAmbient)/(EvapRate*h_cu_mole);
