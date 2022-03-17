@@ -15,7 +15,7 @@ This project can run in both Windows or Linux. It is script based modelling, ins
 * The python script first checks the platform, Linux or Windoes, then writes the Fluent journal file, and then run fluent journal file to compile UDF and setup the model.
 * The fluent journal file will read the mesh, load UDF, import/interpolate the gas transport/thermodynamic properties and finally submit the fluent job.
 * During the running, the script will export the simulation results as figures, like current denstiy, temperature and potential field, at end of each timestep.
-* After the job is done, we can combine the results figure into a video by running video_from_image.py, which is very convenient, becasue hardly can a 3rd-party post-process software load simulaiton results more than 100GB (too slow).
+* After the job is done, we can combine the results figures into a video by running video_from_image.py, which is very convenient, becasue hardly can a 3rd-party post-process software load simulaiton results more than 100GB (too slow).
 * I sincerely acknowledge UConn EIRC lab that gives me lots of help and support when develop these code. 
 
 ## Physcial process
