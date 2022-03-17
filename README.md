@@ -22,7 +22,7 @@ This project can run in both Windows or Linux. It is script based modelling, ins
 For the mulitphyscis modelling of thermal plasma, we did secondery development for Fluent Solver by UDF, which includes the following assumptions/physcis.
 
 * Assumption: Fully ionizated plasma in both local thermodynamic and chemcial equilbrium.
-* Gas dynamics
+* Collision-dominated collective behavior: continuum thermodynamics/fluid description.
 * Electromagnetics field: charge conservation equation + magnetic vector poisson equation
 * Surface chemical reaction and Species tranprot
 * Heat transfer and Thermal radiation based on DOM method
