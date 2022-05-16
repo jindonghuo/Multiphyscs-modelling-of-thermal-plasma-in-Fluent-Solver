@@ -2,7 +2,7 @@
 
 
 ## Contributor
-Jindong Huo, independent contributor
+Jindong Huo, main contributor. Great thanks to Eirc Lab, UConn.
 
 ## Reference
 * This method has been used for publication: https://aip.scitation.org/doi/10.1063/5.0012159
