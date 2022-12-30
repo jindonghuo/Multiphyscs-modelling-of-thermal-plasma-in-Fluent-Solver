@@ -6,10 +6,10 @@ Jindong Huo, main contributor. Great thanks to Eirc Lab, UConn.
 
 ## Reference
 * Please refer to below papers for more
-** https://aip.scitation.org/doi/10.1063/5.0012159
-** https://doi.org/10.1093/pnasnexus/pgac129
-** https://iopscience.iop.org/article/10.1088/1361-6463/abc64b/meta
-** https://doi.org/10.1063/1.5090867
+    ** https://aip.scitation.org/doi/10.1063/5.0012159
+    ** https://doi.org/10.1093/pnasnexus/pgac129
+    ** https://iopscience.iop.org/article/10.1088/1361-6463/abc64b/meta
+    ** https://doi.org/10.1063/1.5090867
 
 
 * For thermally non-equilibrium state, additional electron energy equation is needed to solve electron temperature which is different from heavy particles temperature. 
