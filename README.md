@@ -48,7 +48,9 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * Test the code by running a few time-steps: like /solve/dual-time-iterate 2 30, which means run 2 steps and each step with maximum 30 iterations
 * If initialization works well, then run it for more time-steps
 * In summary, the one commond to run the whole simualtion in both linux and windows CMD/PowerShell is:
+  
   **$ Shift + right click to open powershell in win**
+  
   **$ python python_script.py**
 
 If you have any questions, please leave a comments or email huojindong@gmail.com
