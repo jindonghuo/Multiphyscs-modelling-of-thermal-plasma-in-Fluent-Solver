@@ -42,7 +42,7 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 
 ## Steps to run:
 * please download the input data from the links in udfcode/download1.txt and udfcode/download2.txt. And put them in the udfcode directory.
-* Create your geometry mesh in whatever format that can be read by Fluent, then open it by fluent, check the cell zone or surface name/ID
+* IF you want to create your own geometry mesh in whatever format, please use Fluent open it, check the cell zone or surface name/ID and them save as .cas file
 * modify the python_script.py file and replace the cell zone and boundary names 
 * Then save the fluent file into geometry_mesh.cas, and put this file into src_resources folder
 * Test the code by running a few time-steps: like /solve/dual-time-iterate 2 30, which means run 2 steps and each step with maximum 30 iterations
