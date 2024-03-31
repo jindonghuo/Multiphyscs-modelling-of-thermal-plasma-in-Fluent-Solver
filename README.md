@@ -34,19 +34,21 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * 3D transient
 
 ## Requirements
-* Please ensure you have properly installed Fluent and python 3 in your platform.
+* Please ensure you have properly installed Fluent (we tested it in fluent 2021R1) and python 3 in your platform.
 * In windows, it needs the C compiler installed. It seems latest ANSYS Fluent has in-built compiler, thus no additional compiler is needed. 
 * In windows, modify the environment by clicking C:\Program Files\ANSYS Inc\v211\fluent\ntbin\win64\setenv.exe to add fluent to PATH 
 * In linux, please export gcc as compiler
 * Suggest shared-memory for parallel computing (multiple cores/threads with single virtual memory address space)
 
 ## Steps to run:
-* please download the input data from the links in udfcode/download1.txt and udfcode/download2.txt. And put them in the udfcode directory.
+* please download the input data from the links in udfcode/download1.txt and udfcode/download2.txt. And put them in the udfcode directory. Ignore the warnning "too big to load" or "login dropbox account", and you can download without any issues.
 * IF you want to create your own geometry mesh in whatever format, please use Fluent open it, check the cell zone or surface name/ID and them save as .cas file
 * modify the python_script.py file and replace the cell zone and boundary names 
 * Then save the fluent file into geometry_mesh.cas, and put this file into src_resources folder
 * Test the code by running a few time-steps: like /solve/dual-time-iterate 2 30, which means run 2 steps and each step with maximum 30 iterations
 * If initialization works well, then run it for more time-steps
 * In summary, the one commond to run the whole simualtion in both linux and windows CMD/PowerShell is:
-
+  **$ Shift + right click to open powershell in win**
   **$ python python_script.py**
+
+If you have any questions, please leave a comments or email huojindong@gmail.com
