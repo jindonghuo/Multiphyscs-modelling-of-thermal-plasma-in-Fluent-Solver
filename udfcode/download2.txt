@@ -1,0 +1,3 @@
+download the geometry input: thick24mm_ionlayer_1layer_denseMesh_v3.cas
+from: 
+https://www.dropbox.com/scl/fi/t08kn12roex0i5du4r7v1/thick24mm_ionlayer_1layer_denseMesh_v3.cas?rlkey=v8uchar2rd2innk8gixpu0f97&dl=0
