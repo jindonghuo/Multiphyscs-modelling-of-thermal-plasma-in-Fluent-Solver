@@ -53,4 +53,4 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
   
   **$ python python_script.py**
 
-If you have any questions, please leave a comments or email huojindong@gmail.com
+If you have any questions, please leave comments or email huojindong@gmail.com
