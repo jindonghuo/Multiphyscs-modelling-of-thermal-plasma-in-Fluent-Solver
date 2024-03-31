@@ -40,7 +40,8 @@ For the mulitphyscis modelling of thermal plasma, we did secondery development f
 * In linux, please export gcc as compiler
 * Suggest shared-memory for parallel computing (multiple cores/threads with single virtual memory address space)
 
-## Executing 
+## Steps to run:
+* please download the input data from the links in udfcode/download1.txt and udfcode/download2.txt. And put them in the udfcode directory.
 * Create your geometry mesh in whatever format that can be read by Fluent, then open it by fluent, check the cell zone or surface name/ID
 * modify the python_script.py file and replace the cell zone and boundary names 
 * Then save the fluent file into geometry_mesh.cas, and put this file into src_resources folder
