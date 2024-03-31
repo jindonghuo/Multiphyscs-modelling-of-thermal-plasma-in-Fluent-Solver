@@ -4,12 +4,10 @@
 #include "para.h"
 #include "headfile1.h"
 #include "materials.h"
-#include "sg_mem.h"        /*  Wall flux  */
+#include "sg_mem.h"     /* This has the Wall flux.*/
 
-/* this file is created by Jindong, huojindong@gmail.com */
-/* (rpsetvar 'uds/diffusion-long? #t)     */
-/*  Below aims to define format */
-#if RP_DOUBLE              
+/*(rpsetvar 'uds/diffusion-long? #t) */
+#if RP_DOUBLE           /* this aims to define format, but it seems unnecessary */
 #  define REAL_FMT "%le"
 #  define INT_FMT "%d"
 #else
@@ -41,32 +39,31 @@
 #define cellzone_cathode_ionlay 19
 
 #define wall_anode_anode_drop_f 43 
-#define wall_cathode_cathode_drop_f 4
+#define wall_cathode_cathode_drop_f 4  
 
 #define Ablative_wall_air 35  
 #define Current_input_faceID 24  
 
 #define X_PLASMA 0.0
-#define Y_PLASMA 27e-3
+#define Y_PLASMA 24.8e-3
 #define Z_PLASMA 0.0
-#define ARC_RADIUS 1.1e-3 
+#define ARC_RADIUS 1.0e-3 
 
-#define SIGMA_MIN 2e-6                     /* Min electrical conductivity (S/m) = the air Econd */
-#define KB 1.38064903e-23	               /* Boltzmann constant                                */
-#define Stefan_Boltzmann 5.670e-8          /* The blackbody radiation sigma                     */
+#define SIGMA_MIN 1e-5                 /* Min electrical conductivity (S/m) = the air Econd */
+#define KB 1.38064903e-23	           /* Boltzmann constant                                */
+#define Stefan_Boltzmann 5.670e-8      /* The blackbody radiation sigma                     */
 #define TempMeltPa66 475
-#define TempBoilPa66 1014                  /* Unit is K, This is Pa66 boil temperature, the wall temperature cannot large than it  */
-#define TempBoilCu 2835                    /* Unit is K, Copper boiling temperature             */
-#define TempAmbient 300                    /* Unit is K, Ambient temperature                    */
-#define thermalcond_cu 387.56              /* Thermal conductivity of Copper, fluent default    */
-#define CuSaturatedVaporP 101325.0         /* 101325.0                                          */
-#define Cu_atomic_mass 1.0552e-25          /* the unit is kg for each atom      */
+#define TempBoilPa66 1014              /* Unit is K, This is Pa66 boil temperature, the wall temperature cannot large than it  */
+#define TempBoilCu 2835                /* Unit is K, Copper boiling temperature             */
+#define TempAmbient 300                /* Unit is K, Ambient temperature                    */
+#define thermalcond_cu 387.56          /* Thermal conductivity of Copper, fluent default    */
+#define CuSaturatedVaporP 101325.0     /* 101325.0                                          */
+#define Cu_atomic_mass 1.0552e-25    
 #define Avogadro_constant 6.02214179e23
-#define h_pa66 2.6e6		               /* J/Kg  equivalent total enthalpy of vapour entering the arc plasma. From: "Ablation Controlled Arcs" C. B. RUCHTI AND L. NIEMEYER   */
-#define h_cu 5.31012e6                     /* J/Kg  the sum of fusion and vaporization, cupper latent heat of fusion (0.207e6 J/Kg) , evaporation (4.694e6 J/Kg)                 */
-#define h_cu_mole 3.374368855e5            /* J/mol   for copper, 63.4kg=1kmol   */
+#define h_pa66 2.6e6		           /* J/Kg  equivalent total enthalpy of vapour entering the arc plasma. From: "Ablation Controlled Arcs" C. B. RUCHTI AND L. NIEMEYER   */
+#define h_cu 4.901e6                   /* J/Kg  the sum of fusion and vaporization, cupper latent heat of fusion (0.207e6 J/Kg) , evaporation (4.694e6 J/Kg)                 */
 #define MW_pa66 224
-#define MW_cu 63.546
+#define MW_cu 64
 
 #define T_num 21
 #define J_num 27
@@ -74,22 +71,23 @@
 #define PHIc 4.5
 #define PHIa 4.5
 #define Mu0 12.567e-7                     /* this is the vacuum permeability                */
-#define Input_num 332
 
 #define Shealth_Thickness 0.0001
-#define Maximum_energy_source 4.0e13      /* Unit is the W/m3                               */
+#define Maximum_energy_source 8.0e13      /* Unit is the W/m3                               */
 #define Ablation_Wall_thickness 0.002     /* Unit is meter.                                 */
 #define Absorptivity_wall 0.5             /* Absorptivity_wall=1-exp(-WallThichness*Abs_coeff) , but he polymer absorption coefficient doesn't matter  */
 
-#define CurrFreq 62.5
-#define CurrAmpl 20.0
-#define VdropC 10
-#define VdropA 8
+#define CurrFreq 60.0
+#define CurrAmpl 0.32
+#define VdropC 20
+#define VdropA 10
+#define Tcompensate 2000
+#define Econd_adjust 0.9
 
 const char FileName[]="pa66_cu_air_table_v5.txt";
 const char FileNameP1Cu[]="Cu_Avearge_Abs_coeff_P1_model_for_UDF.txt";
 const char FileNameP1Air[]="AirAbsCoeffP1.txt";
-/* const char FileNameAbs[]="FWB_Air_PA66_Cu_05152018.txt";  */
+/*const char FileNameAbs[]="FWB_Air_PA66_Cu_05152018.txt";  */
 const double P0fl = 101325.0;                             
 static int LoadFlag = 0;
 static int LoadFlagP1Cu = 0;
@@ -98,15 +96,15 @@ static double LangmuirConstantRate=0.0;                   /* Default initialized
 static double Current_BC=CurrAmpl;                        /* This is I=4000*sin( M_PI*TimeSteps/5e-3+M_PI/90) when TimeSteps=0 unit is Ampere                           */
 static double CurrentInput_area=0.0;
 
-TABLE table;
+TABLE table;                                           
 P1_TABLE p1_table_cu;
 P1_TABLE p1_table_air;
 
 enum UDM
 {
   UDM_Bx, UDM_By, UDM_Bz, UDM_Bmag, UDM_Jx, UDM_Jy, UDM_Jz, UDM_Jmag, UDM_Ex, UDM_Ey, UDM_Ez, UDM_Emag, UDM_Fx, UDM_Fy, UDM_Fz, UDM_Fmag, 
-  UDM_ESCurrent, UDM_ESrootvap, UDM_ESrootcond, UDM_QWallFlux_F, UDM_QRadFlux_F, UDM_QCondFlux_F, UDM_Qe_F, UDM_Qion_F, UDM_Qecap_F, 
-  UDM_Qcondcu_F, UDM_Qvapcu_F, UDM_Pa66_rate_F, UDM_ECond, UDM_Vdrop, UDM_SR_rate, UDM_Cu_mole, UDM_Vap2cond_F
+  UDM_ESCurrent, UDM_ESe, UDM_ESion, UDM_ESecap, UDM_EScondcu, UDM_QradAblation_F, UDM_QCondAblation_F, UDM_Qe_F, UDM_Qion_F, UDM_Qecap_F, 
+  UDM_Qcondcu_F, UDM_Qvapcu_F, UDM_m_dot_F, UDM_ECond, UDM_Vdrop, UDM_SR_rate, UDM_WallFlux, UDM_RadFlux
 };
 
 /*
@@ -127,27 +125,26 @@ UDM_Fy			  	13
 UDM_Fz			  	14
 UDM_Fmag            15
 
-UDM_ESCurrent	    16
-UDM_ESrootvap	    17
-UDM_ESrootcond      18
+UDM_ESCurrent	    16 
+UDM_ESe			  	17   
+UDM_ESion	  		18  
+UDM_ESecap		  	19  
+UDM_EScondcu        20
 
-UDM_QWallFlux_F     19
-UDM_QRadFlux_F      20
-UDM_QCondFlux_F	    21
+UDM_QradAblation_F	21	
+UDM_QCondAblation_F	22	 
+UDM_Qe_F		  	23  
+UDM_Qion_F			24  
+UDM_Qecap_F		  	25 
+UDM_Qcondcu_F    	26
+UDM_Qvapcu_F	  	27
+UDM_m_dot_F			28
+UDM_ECond		    29   
+UDM_Vdrop           30 
 
-UDM_Qe_F		  	22
-UDM_Qion_F			23  
-UDM_Qecap_F		  	24 
-UDM_Qcondcu_F    	25
-UDM_Qvapcu_F	  	26
-
-UDM_Pa66_rate_F		27
-UDM_ECond		    28
-UDM_Vdrop           29 
-UDM_SR_rate         30
-UDM_Cu_mole         31
-UDM_Vap2cond_F      32
-
+UDM_SR_rate         31
+UDM_WallFlux        32
+UDM_RadFlux         33
 */
 
 enum UDS                  
@@ -155,10 +152,11 @@ enum UDS
   UDS_V,UDS_Ax,UDS_Ay,UDS_Az,N_REQUIRED_UDS
 };
 
-double epsilon_w = 1.0;                                         /*  epsilon_w is the emissivity used for wall ablation. epsilon_w=1 means blackbody emissivity, we should give a small value   */
-double JJ_Density[J_num] ={1,319.4244,1079.137,1798.561,3237.41,4316.547,5755.396,7913.669,9712.229,11510.79,13309.35,16546.76,19784.17,25179.86,31294.96,35971.22,42805.75,48920.86,55395.68,62230.21,69424.46,78417.27,90647.48,108273.4,122661.9,141726.6,150359.7};
-double Catho_Vdrop[J_num]={0.0001,1.630436,4.891305,8.586957,13.58696,16.30435,18.91304,21.08696,22.06522,22.3913,22.3913,21.73913,20.76087,19.02174,17.28261,16.08696,14.56522,13.69565,12.82609,12.17391,11.63043,11.19565,10.76087,10.43478,10.21739,10.1087,10};
-double Anode_Vdrop[J_num]={0.0001,0.5217395,1.530435,2.747826,4.347826,5.182609,6.017391,6.747826,7.06087,7.095652,7.165217,6.956522,6.643478,6.086957,5.530435,5.147826,4.66087,4.382609,4.104348,3.895652,3.721739,3.582609,3.443479,3.339131,3.269565,3.234783,3.2};
+double epsilon_w = 1.0;    /* epsilon_w is the emissivity used for wall ablation. epsilon_w=1 means blackbody emissivity, we should give a small value. */
+                           /* jj is the current density, same meaning as J_mag */
+double jj[J_num]={8,319.4244,1079.137,1798.561,3237.41,4316.547,5755.396,7913.669,9712.229,11510.79,13309.35,16546.76,19784.17,25179.86,31294.96,35971.22,42805.75,48920.86,55395.68,62230.21,69424.46,78417.27,90647.48,108273.4,122661.9,141726.6,150359.7};
+double Cathode_volt_drop[J_num]={0.0001,1.630436,4.891305,8.586957,13.58696,16.30435,18.91304,21.08696,22.06522,22.3913,22.3913,21.73913,20.76087,19.02174,17.28261,16.08696,14.56522,13.69565,12.82609,12.17391,11.63043,11.19565,10.76087,10.43478,10.21739,10.1087,10};
+double Anode_volt_drop[J_num]={0.0001,0.5217395,1.530435,2.747826,4.347826,5.182609,6.017391,6.747826,7.06087,7.095652,7.165217,6.956522,6.643478,6.086957,5.530435,5.147826,4.66087,4.382609,4.104348,3.895652,3.721739,3.582609,3.443479,3.339131,3.269565,3.234783,3.2};
 
 double tt[T_num]={300,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,12000,14000,16000,18000,20000,22000,24000,26000,28000,30000};
 double Air_vis[T_num]={1.79E-05,0.0000418,0.0000648,0.0000858,0.000108,0.00013,0.000154,0.000186,0.000221,0.000246,0.000263,0.000263,0.000177,0.000096,0.00006,0.000054,0.000058,0.000063,0.000062,0.000053,0.000042};
@@ -173,29 +171,42 @@ double abs_coeff_5[100]={0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0
 double abs_coeff_6[100]={0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000100,0.000106071143091149,0.000147417137644518,0.000275048792474063,0.000406436770019764,0.000587902260417402,0.000959244332053151,0.00158642029708544,0.00249771961733381,0.00472020135912516,0.00937029205331210,0.0162664404135633,0.0269142935579098,0.0449109076870519,0.0714021948208209,0.110485289293005,0.167228579019925,0.233455199766415,0.312226026120499,0.441641192783902,0.636661085359467,0.868454232634700,1.11874273441747,1.39394083589940,1.70184170475805,2.04058903906123,2.40307478267286,2.78058423715366,3.15867040844519,3.52156490837837,3.85354453612031,4.13944731975213,4.36449119352017,4.51522444796655,4.59308551490310,4.60889090786103,4.57360349081093,4.49805946663524,4.39239278569507,4.26649539812608,4.13025589676981,3.99020213106841,3.84310951935907,3.68399449229554,3.50787348053158,3.31028897458194,3.09814902398425,2.88933391775311,2.70217131026588,2.55361882266805,2.43968941162820,2.34004216906020,2.23390529099875,2.10836276631699,1.97517351064404,1.85092848651346,1.74878739564657,1.66702490193733,1.59988031395936,1.54159286668952,1.48664186857074,1.43248798356990,1.37860983117335,1.32452417585588,1.26981871719154,1.21607084491383,1.16706966374259,1.12671977430487,1.09892201754544,1.08536381588792,1.08179394709468,1.08297556519293,1.08367182420984,1.07864587817261,1.06268092371714,1.03545684852199,1.00791531801678,0.991867541692858,0.989390555760633,0.995483438322247,1.00487906940307,1.01000747643067,1.00107552736176,0.968199446438494};
 double temperature[100]={300,600,900,1200,1500,1800,2100,2400,2700,3000,3300,3600,3900,4200,4500,4800,5100,5400,5700,6000,6300,6600,6900,7200,7500,7800,8100,8400,8700,9000,9300,9600,9900,10200,10500,10800,11100,11400,11700,12000,12300,12600,12900,13200,13500,13800,14100,14400,14700,15000,15300,15600,15900,16200,16500,16800,17100,17400,17700,18000,18300,18600,18900,19200,19500,19800,20100,20400,20700,21000,21300,21600,21900,22200,22500,22800,23100,23400,23700,24000,24300,24600,24900,25200,25500,25800,26100,26400,26700,27000,27300,27600,27900,28200,28500,28800,29100,29400,29700,30000};
 
-double input_time[Input_num]={3.06e-06,3.32e-04,3.58e-04,3.83e-04,4.09e-04,4.34e-04,4.60e-04,4.86e-04,5.11e-04,5.37e-04,5.62e-04,5.88e-04,6.14e-04,6.39e-04,6.65e-04,6.90e-04,7.16e-04,7.42e-04,7.67e-04,7.93e-04,8.18e-04,8.44e-04,8.70e-04,8.95e-04,9.21e-04,9.46e-04,9.72e-04,9.98e-04,1.02e-03,1.05e-03,1.07e-03,1.10e-03,1.13e-03,1.15e-03,1.18e-03,1.20e-03,1.23e-03,1.25e-03,1.28e-03,1.30e-03,1.33e-03,1.36e-03,1.38e-03,1.41e-03,1.43e-03,1.46e-03,1.48e-03,1.51e-03,1.54e-03,1.56e-03,1.59e-03,1.61e-03,1.64e-03,1.66e-03,1.69e-03,1.71e-03,1.74e-03,1.77e-03,1.79e-03,1.82e-03,1.84e-03,1.87e-03,1.89e-03,1.92e-03,
-	1.94e-03,1.97e-03,2.00e-03,2.02e-03,2.05e-03,2.07e-03,2.10e-03,2.12e-03,2.15e-03,2.18e-03,2.20e-03,2.23e-03,2.25e-03,2.28e-03,2.30e-03,2.33e-03,2.35e-03,2.38e-03,2.41e-03,2.43e-03,2.46e-03,2.48e-03,2.51e-03,2.53e-03,2.56e-03,2.58e-03,2.61e-03,2.64e-03,2.66e-03,2.69e-03,2.71e-03,2.74e-03,2.76e-03,2.79e-03,2.82e-03,2.84e-03,2.87e-03,2.89e-03,2.92e-03,2.94e-03,2.97e-03,2.99e-03,3.02e-03,3.05e-03,3.07e-03,3.10e-03,3.12e-03,3.15e-03,3.17e-03,3.20e-03,3.22e-03,3.25e-03,3.28e-03,3.30e-03,3.33e-03,3.35e-03,3.38e-03,3.40e-03,3.43e-03,3.46e-03,3.48e-03,3.51e-03,3.53e-03,3.56e-03,
-	3.58e-03,3.61e-03,3.63e-03,3.66e-03,3.69e-03,3.71e-03,3.74e-03,3.76e-03,3.79e-03,3.81e-03,3.84e-03,3.86e-03,3.89e-03,3.92e-03,3.94e-03,3.97e-03,3.99e-03,4.02e-03,4.04e-03,4.07e-03,4.10e-03,4.12e-03,4.15e-03,4.17e-03,4.20e-03,4.22e-03,4.25e-03,4.27e-03,4.30e-03,4.33e-03,4.35e-03,4.38e-03,4.40e-03,4.43e-03,4.45e-03,4.48e-03,4.50e-03,4.53e-03,4.56e-03,4.58e-03,4.61e-03,4.63e-03,4.66e-03,4.68e-03,4.71e-03,4.74e-03,4.76e-03,4.79e-03,4.81e-03,4.84e-03,4.86e-03,4.89e-03,4.91e-03,4.94e-03,4.97e-03,4.99e-03,5.02e-03,5.04e-03,5.07e-03,5.09e-03,5.12e-03,5.14e-03,5.17e-03,5.20e-03,
-	5.22e-03,5.25e-03,5.27e-03,5.30e-03,5.32e-03,5.35e-03,5.38e-03,5.40e-03,5.43e-03,5.45e-03,5.48e-03,5.50e-03,5.53e-03,5.55e-03,5.58e-03,5.61e-03,5.63e-03,5.66e-03,5.68e-03,5.71e-03,5.73e-03,5.76e-03,5.78e-03,5.81e-03,5.84e-03,5.86e-03,5.89e-03,5.91e-03,5.94e-03,5.96e-03,5.99e-03,6.02e-03,6.04e-03,6.07e-03,6.09e-03,6.12e-03,6.14e-03,6.17e-03,6.19e-03,6.22e-03,6.25e-03,6.27e-03,6.30e-03,6.32e-03,6.35e-03,6.37e-03,6.40e-03,6.42e-03,6.45e-03,6.48e-03,6.50e-03,6.53e-03,6.55e-03,6.58e-03,6.60e-03,6.63e-03,6.66e-03,6.68e-03,6.71e-03,6.73e-03,6.76e-03,6.78e-03,6.81e-03,6.83e-03,
-	6.86e-03,6.89e-03,6.91e-03,6.94e-03,6.96e-03,6.99e-03,7.01e-03,7.04e-03,7.06e-03,7.09e-03,7.12e-03,7.14e-03,7.17e-03,7.19e-03,7.22e-03,7.24e-03,7.27e-03,7.30e-03,7.32e-03,7.35e-03,7.37e-03,7.40e-03,7.42e-03,7.45e-03,7.47e-03,7.50e-03,7.53e-03,7.55e-03,7.58e-03,7.60e-03,7.63e-03,7.65e-03,7.68e-03,7.70e-03,7.73e-03,7.76e-03,7.78e-03,7.81e-03,7.83e-03,7.86e-03,7.88e-03,7.91e-03,7.94e-03,7.96e-03,7.99e-03,8.01e-03,8.04e-03,8.06e-03,8.09e-03,8.11e-03,8.14e-03,8.17e-03,8.19e-03,8.22e-03,8.24e-03,8.27e-03,8.29e-03,8.32e-03,8.34e-03,8.37e-03,8.40e-03,8.42e-03,8.45e-03,8.47e-03,
-	8.50e-03,8.52e-03,8.55e-03,8.58e-03,8.60e-03,8.63e-03,8.65e-03,8.68e-03,8.70e-03,8.73e-03,8.75e-03,8.78e-03};
-
-double input_current[Input_num]={40.0,293.0,332.2,371.4,410.6,449.8,489.0,529.0,562.0,589.0,611.0,627.8,640.4,651.0,660.0,669.0,676.1,683.1,689.4,696.9,707.5,717.3,726.3,733.7,742.4,753.7,765.9,779.2,792.9,804.7,816.9,827.8,836.9,844.7,854.5,864.3,875.7,886.7,895.3,903.5,911.4,919.2,929.0,937.6,945.9,958.0,969.0,980.0,990.6,1000.8,1011.0,1022.0,1031.0,1040.8,1052.5,1065.1,1077.6,1089.8,1099.2,1109.8,1118.8,1127.8,1136.9,1144.3,1152.9,1162.4,1170.2,1176.5,1180.8,1185.5,1189.0,1192.5,1194.1,1192.5,1188.6,1182.4,1174.1,1166.7,1160.0,1155.3,1151.8,1150.6,1152.5,1153.7,1156.5,1160.4,1167.5,1175.3,1183.5,1189.8,1194.9,
-	1196.1,1194.9,1191.4,1185.1,1174.9,1164.3,1153.3,1140.4,1126.3,1114.1,1105.1,1097.3,1090.2,1084.3,1077.6,1069.8,1062.4,1057.3,1053.3,1049.0,1047.1,1046.3,1043.1,1040.0,1038.0,1038.0,1038.4,1039.2,1041.6,1045.9,1049.4,1053.7,1058.4,1062.4,1066.7,1071.8,1074.5,1077.6,1075.7,1071.8,1066.3,1059.2,1051.8,1043.5,1034.1,1025.1,1014.5,1003.9,994.1,984.3,974.9,967.8,962.7,959.2,955.3,950.6,944.3,937.6,930.2,922.4,912.9,903.9,893.7,882.7,871.4,861.2,850.6,841.2,830.2,820.0,810.2,800.8,793.7,787.5,782.0,777.6,774.9,773.3,770.2,767.1,762.7,757.6,753.3,748.2,742.0,734.5,727.1,718.8,708.6,697.3,
-	684.7,671.0,657.6,644.7,632.2,619.6,606.7,592.9,578.4,562.4,547.1,531.8,515.7,500.0,485.1,470.6,456.5,442.7,429.0,417.6,409.0,401.2,394.5,387.5,380.8,374.5,368.6,362.7,356.5,350.2,343.9,338.4,332.2,325.5,318.8,311.4,305.5,298.8,292.9,288.6,283.1,278.0,273.7,269.0,264.3,257.3,251.4,245.5,241.2,236.9,234.1,232.2,230.6,230.6,230.6,229.4,227.8,227.8,227.8,226.3,223.9,220.0,215.7,211.4,206.3,199.6,192.9,185.1,179.2,172.5,164.7,157.6,151.4,145.5,140.8,135.7,130.6,124.7,119.2,114.5,111.4,107.1,103.9,100.8,98.4,96.1,94.1,91.4,89.4,88.2,86.7,85.1,83.1,80.8,78.8,77.6,76.5,75.7,74.9,73.7,74.9,
-	74.9,76.1,76.9,78.0,79.2,80.0,79.6,78.4,78.4,77.3,76.5,76.5,74.5,71.4,68.6,67.1,65.1,64.3,64.3,65.5,67.5,68.2,67.1,66.7,66.7,67.8,70.2,72.5,73.3,74.9,74.5,72.2,68.6,65.1,62.7,60.4,58.4,56.5,53.3,50.2,45.5,42.0,38.0,36.1,35.8,35.9,36.0,36.1,36.2,36.3};
-
-/*
-
-k1_V97_0.01_1.8_2.2_J5e3_4e4_8e4_4g
-
-*/
-
-double Cathode_Drop(const double j)
+double GetArcSpotRadius(double PowerIn)
 {
-  double Vc0=VdropC*0.2;
-  double Vc_ig=VdropC*2.2;
-  double jc_0=5e2, jc_ig=3e4, jcf=0.6e5;
+ double langmuir_radius; 
+ langmuir_radius = sqrt(pow(thermalcond_cu*(TempBoilCu-TempAmbient)/LangmuirConstantRate/h_cu, 2) + PowerIn/(LangmuirConstantRate*h_cu*M_PI))-thermalcond_cu*(TempBoilCu-TempAmbient)/(LangmuirConstantRate*h_cu);  
+ return langmuir_radius;
+}
+
+/* Interpolation. based on u inpt, find it position i in x[], we try to find the y[i] value by interpolating as the output.*/
+double interp(double curr[], double vdrop[], int n, double input)
+{
+  if(input >= curr[n-1])
+  {
+  	   return vdrop[n-1];
+  }
+  else if (input <= curr[0])
+  {
+   	   return vdrop[0];
+  }
+  else
+  {
+  	   int i=0,j=n-1,a;
+	   while (j-i!=1)
+	   {
+		  a=(i+j)/2;  /* 2.95 will be 2*/
+		  if (input < curr[a]) j=a;
+		  else i=a;
+	   }
+	   return (vdrop[i]+(input-curr[i])*(vdrop[j]-vdrop[i])/(curr[j]-curr[i]));
+  }
+}
+
+double Cathode_Drop(double j)
+{
+  double Vc0=VdropC*0.1;
+  double Vc_ig=VdropC*2.0;
+  double jc_0=1e3, jc_ig=0.8e4, jcf=2.4e4;
   double c0, c1, c2;
 
   c0=(Vc_ig-Vc0)/(pow(jc_0,3)*(2*jc_ig-jc_0));
@@ -210,11 +221,11 @@ double Cathode_Drop(const double j)
   	return (Vc_ig-VdropC) * exp(-pow(j-jc_ig,2)/c2) + VdropC;
 }
 
-double Anode_Drop(const double j)
+double Anode_Drop(double j)
 {
-  double Va0=VdropA*0.2;
-  double Va_ig=VdropA*3.1;
-  double ja_0=5e2, ja_ig=3e4, jaf=0.6e5;
+  double Va0=VdropA*0.1;
+  double Va_ig=VdropA*2.2;
+  double ja_0=1e3, ja_ig=0.8e4, jaf=2.4e4;
   double a0, a1, a2;
   
   a0=(Va_ig-Va0)/(pow(ja_0,3)*(2*ja_ig-ja_0));
@@ -226,34 +237,7 @@ double Anode_Drop(const double j)
   else if(j<=ja_ig)
   	return -a1*pow(ja_ig-j,2) + Va_ig;
   else 
-  	return (Va_ig-VdropA)*exp(-pow(j-ja_ig,2)/a2) + VdropA;
-}
-
-double GetArcSpotRadius(const double PowerIn, const double EvapRate)
-{
-	 double arc_radius;
-	 arc_radius = sqrt(pow(thermalcond_cu*(TempBoilCu-TempAmbient)/EvapRate/h_cu_mole, 2) + PowerIn/(EvapRate*h_cu_mole*M_PI))-thermalcond_cu*(TempBoilCu-TempAmbient)/(EvapRate*h_cu_mole);
-	 return arc_radius;
-}
-
-/* Interpolation. based on u inpt, find it position i in x[], we try to find the y[i] value by interpolating as the output */
-double interp(const double xx[], const double yy[], const int n, const double input)
-{
-  if(input >= xx[n-1])
-  	   return yy[n-1];
-  else if (input <= xx[0])
-   	   return yy[0];
-  else
-  {
-  	   int i=0,j=n-1,a;
-	   while (j-i!=1)
-	   {
-		  a=(i+j)/2;               /* 2.95 will be 2 */
-		  if (input < xx[a]) j=a;
-		  else i=a;
-	   }
-	   return (yy[i]+(input-xx[i])*(yy[j]-yy[i])/(xx[j]-xx[i]));
-  }
+  	return (Va_ig-VdropA) * exp(-pow(j-ja_ig,2)/a2) + VdropA;
 }
 
 double InterpolateAbsorptionCoefficient(double T, double P, double muCu, double muAir, double muPa66, int NumBand)
@@ -279,7 +263,7 @@ double InterpolateAbsorptionCoefficient(double T, double P, double muCu, double 
 	return ret;
 }
 
-DEFINE_EXECUTE_AFTER_CASE(load_fluentdata, libname)                                      
+DEFINE_EXECUTE_AFTER_CASE(load_fluentdata, libname)                                                       
 {   
 	int ret;  /*Useless*/
 	Message("Test initial DEFINE_EXECUTE_AFTER_CASE. mark1 \n");    
@@ -351,6 +335,7 @@ DEFINE_EXECUTE_AFTER_CASE(load_fluentdata, libname)
 	}
 #endif 
 }
+
 
 DEFINE_EXECUTE_AT_EXIT(unload_fluentdata)  
 {  
@@ -475,11 +460,11 @@ DEFINE_INIT(A_init_TempPressure,d)
 				C_CENTROID(xc,cell,thread);    
 				if (xc[0]>=-10e-3 && xc[0]<=10e-3)  
 				{
-				  C_T(cell,thread) = 300 + 50*exp(-(pow((xc[1]-Y_PLASMA),2)+pow(xc[2]-Z_PLASMA,2))/(2*pow(ARC_RADIUS,2)))/(ARC_RADIUS*sqrt(2*M_PI));   			
-				  C_P(cell,thread) = 300 + 10*exp(-(pow((xc[1]-Y_PLASMA),2)+pow(xc[2]-Z_PLASMA,2))/(2*pow(ARC_RADIUS,2)))/(ARC_RADIUS*sqrt(2*M_PI));   
+				  C_T(cell,thread) = 300 + 25.0*exp(-(pow((xc[1]-Y_PLASMA),2)+pow(xc[2]-Z_PLASMA,2))/(2*pow(ARC_RADIUS,2)))/(ARC_RADIUS*sqrt(2*M_PI));   			
+				  C_P(cell,thread) = 300 + 2*exp(-(pow((xc[1]-Y_PLASMA),2)+pow(xc[2]-Z_PLASMA,2))/(2*pow(ARC_RADIUS,2)))/(ARC_RADIUS*sqrt(2*M_PI));   
 				}				 
 			}
-			end_c_loop(cell,thread)
+			end_c_loop(cell,thread)				
 		}
 	}
 	#endif
@@ -498,8 +483,8 @@ DEFINE_INIT(B_cu_pa66_species_initialize, d)
 	Thread *tf = Lookup_Thread(d, Current_input_faceID);
 	double Cu0 = 0.0;
 	double Pa660 = 0.0;	
-	LangmuirConstantRate = CuSaturatedVaporP/sqrt(2*M_PI*Cu_atomic_mass*KB*TempBoilCu)/Avogadro_constant; 
-    /*  the unit is mol/m2/s for langmuirConstantRate  */
+	LangmuirConstantRate = MW_cu*CuSaturatedVaporP/(4*sqrt(Cu_atomic_mass*KB*TempBoilCu/3))/Avogadro_constant/1000; 
+
 	thread_loop_c(ct, d)
 	{		 
 		if (FLUID_THREAD_P(ct))                             
@@ -513,7 +498,7 @@ DEFINE_INIT(B_cu_pa66_species_initialize, d)
 			end_c_loop_int(cell, ct)
 		}		
 	}
-    /* calculate the current input area */
+
 	begin_f_loop(f,tf)        
     {
       double A[ND_ND];	
@@ -538,38 +523,38 @@ DEFINE_EXECUTE_AT_END(A_Sigma_update)
     Domain *d;
     double Ysh[NumberOfArguments];
 	Thread *thread;
-	cell_t cell;
+	cell_t cell;	
+
 
 	d = Get_Domain(1);                  /* Get the domain using ANSYS FLUENT utility, 1 is for the mixture domain, just only fluid domain, without solid domain */		
 	thread_loop_c(thread,d)
 	{
-		if (THREAD_ID(thread)==cellzone_cathode_drop)			                                                                   
+		if (THREAD_ID(thread)==cellzone_cathode_drop)			                                                                     /* Cathode drop */
 		{  
 			begin_c_loop(cell,thread)
 			{
-			    C_UDMI(cell,thread,UDM_Vdrop)= Cathode_Drop(C_UDMI(cell,thread,UDM_Jmag));  
-			/* 	C_UDMI(cell,thread,UDM_Vdrop)= interp(JJ_Density,Catho_Vdrop,J_num,C_UDMI(cell,thread,UDM_Jmag)); */
+				C_UDMI(cell,thread,UDM_Vdrop)=Cathode_Drop(C_UDMI(cell,thread,UDM_Jmag));                                           /* interp(jj_density,cath_vdrop,J_num,C_UDMI(cell,thread,UDM_Jmag));    Intp1 give maximum Vdrop is 10V, so multiply 1.45 to a corrent one*/
 				C_UDMI(cell,thread,UDM_ECond)= C_UDMI(cell,thread,UDM_Jmag)*Shealth_Thickness/C_UDMI(cell,thread,UDM_Vdrop);   
 			}
 			end_c_loop(cell,thread)
 		}
-		else if (THREAD_ID(thread)==cellzone_anode_drop)
+		else if (THREAD_ID(thread)==cellzone_anode_drop)	                                                                         /* Anode drop  */
 		{ 
 			begin_c_loop(cell,thread)
 			{
-                C_UDMI(cell,thread,UDM_Vdrop)= Anode_Drop(C_UDMI(cell,thread,UDM_Jmag));     
-             /*   C_UDMI(cell,thread,UDM_Vdrop)= interp(JJ_Density,Anode_Vdrop,J_num,C_UDMI(cell,thread,UDM_Jmag)); */
+                C_UDMI(cell,thread,UDM_Vdrop)= Anode_Drop(C_UDMI(cell,thread,UDM_Jmag));                                             /* interp(jj_density,anod_vdrop,J_num,C_UDMI(cell,thread,UDM_Jmag));	 */
                 C_UDMI(cell,thread,UDM_ECond)= C_UDMI(cell,thread,UDM_Jmag)*Shealth_Thickness/C_UDMI(cell,thread,UDM_Vdrop); 
-			}
+			}      
 			end_c_loop(cell,thread)
 		}
-		else if (THREAD_ID(thread)==cellzone_air || THREAD_ID(thread)==cellzone_anode_ionlay || THREAD_ID(thread)==cellzone_cathode_ionlay)
+
+		else if (THREAD_ID(thread)==cellzone_air || THREAD_ID(thread)==cellzone_anode_ionlay || THREAD_ID(thread)==cellzone_cathode_ionlay)		                                                                             /* air    */
 		{            
 			begin_c_loop (cell,thread)
 			{
 				Ysh[0]=C_YI(cell,thread,I_Pa66) * 100.0; 
 				Ysh[1]=C_YI(cell,thread,I_Cu) * 100.0;
-				Ysh[2]=C_T(cell,thread);
+				Ysh[2]=C_T(cell,thread) + Tcompensate;
 				if(Ysh[2]>30000.0) Ysh[2]=30000.0;
 				Ysh[3]=(C_P(cell,thread)+P0fl)/101325.0;
 				C_UDMI(cell,thread,UDM_ECond) = FindApproximation(Ysh,&table,Num_Sigma);
@@ -578,51 +563,16 @@ DEFINE_EXECUTE_AT_END(A_Sigma_update)
 		}
 	}
 	#endif
-	/* This happen early than difine_profile.  Due to the symmetry model, thus we need divide it by 2  */   
-	/*Current_BC=ABS(CurrAmpl*sin(2*M_PI*CurrFreq*CURRENT_TIME + M_PI/6.0))+0.001*CurrAmpl;            */          
-	Current_BC=interp(input_time,input_current,Input_num,CURRENT_TIME)/2;   
-	if (Current_BC<CurrAmpl)  Current_BC=CurrAmpl;
+	Current_BC=ABS(0.75*CurrAmpl*sin(2*M_PI*CurrFreq*CURRENT_TIME + M_PI/6.0))+0.35*CurrAmpl;                /* ABS(CurrAmpl*sin(2*M_PI*CurrFreq*CURRENT_TIME + M_PI/6.0));          This happen early than difine_profile.    */   
 	#if RP_HOST
     Message("\n Step %d starts next, StepSize=%.7lf, FlowTime=%.7lf. Current=%.8lf, CurrentInArea =%.8lf \n", N_TIME, CURRENT_TIMESTEP, CURRENT_TIME, Current_BC, CurrentInput_area);
     #endif
 }
 
-DEFINE_EXECUTE_AT_END(B_mole_fraction) 
-{
-    #if !RP_HOST
-    Domain *d;
-    Thread *tf;	
-	cell_t c;
-	Material *mix_mat = mixture_material(Get_Domain(1));
-    Material *spe_mat=NULL;
-    double all_mass_fracts[MAX_SPE_EQNS]; 
-    double all_mole_fracts[MAX_SPE_EQNS];
-
-	d = Get_Domain(1);
-	thread_loop_c(tf,d)                                                                                                                                                                       
-    {
-       if(THREAD_ID(tf)==cellzone_anode_drop || THREAD_ID(tf)==cellzone_cathode_drop || THREAD_ID(tf)==cellzone_anode_ionlay || THREAD_ID(tf)==cellzone_cathode_ionlay)
-		{
-            begin_c_loop(c,tf)
-            {  				
-            	int i=-1;
-		        mixture_species_loop(mix_mat, spe_mat, i)
-		        {
-		        	all_mass_fracts[i] =C_YI(c,tf,i);
-		        }
-	            Mole_Fraction(mix_mat, all_mass_fracts, all_mole_fracts);
-                C_UDMI(c,tf,UDM_Cu_mole)=all_mole_fracts[I_Cu];  
-            }
-            end_c_loop(c,tf)
-         }
-    }
-	#endif
-}
-
 DEFINE_ADJUST(A_uds_number_check,domain)
-{                                              /*  Domain is passed by the ANSYS Fluent solver to your UDF.                            */
-	if (n_uds < N_REQUIRED_UDS)                /*  N_UDS  access the number of UDS  equations that have been specified in ANSYS Fluent */
-    	Internal_Error("not enough user-defined scalars allocated \n");
+{      /* Domain is passed by the ANSYS Fluent solver to your UDF.   */
+	if (n_uds < N_REQUIRED_UDS)  /*// N_UDS  access the number of UDS  equations that have been specified in ANSYS Fluent. */ 
+		Internal_Error("not enough user-defined scalars allocated \n");
 }
 
 DEFINE_ADJUST(B_Maxwell_Equation,d) 
@@ -630,6 +580,7 @@ DEFINE_ADJUST(B_Maxwell_Equation,d)
     #if !RP_HOST
 	Thread *thread;
 	cell_t cell;
+	face_t f;  
 	if (! Data_Valid_P())  return;      /*  returns 1 (true) if the data that is passed as an argument is valid, and 0 (false) if it is not. */
 	                                    /*  check that the cell values of the variables that appear in your UDF are accessible. Unilt it is accessible, the code will continue.*/  
 	thread_loop_c (thread, d)           /*  loop at zone in one domain, since it is a single domain problem.*/
@@ -668,88 +619,79 @@ DEFINE_ADJUST(B_Maxwell_Equation,d)
 DEFINE_ADJUST(C_ArcRoot_Energy,d)
 {
 	#if !RP_HOST 
-	double CellV,CellV_shadow,AREA,Area2V,Area2V_shadow;
-	double ji, je, jn, Local_vdrop;
-	double energyin, R, Evap_rate;
+
+	double CV,AREA,Area2V;
+	double ji, je, jn;
+	double energyin, energyout_Qcond, energyout_Qvap, R;
+
 	double A0[ND_ND],A1[ND_ND]; 
-	Thread *tf, *tf_shadow;
-	face_t f, f_shadow; 	          
 
-	if (! Data_Valid_P())  return;                                              /* Make sure need variable is already exited. Return means the function stop here and return to main function.*/                                                
-	thread_loop_f (tf, d)                                                       /* Use thread_loop_f when you want to loop over all face threads (like a geometry face) in a given domain.*/
+	Thread *tf;
+	cell_t cell;
+	face_t f; 	          
+	if (! Data_Valid_P())  return;                                          /* Make sure need variable is already exited. Return means the function stop here and return to main function.*/                                                
+
+	thread_loop_f (tf, d)                                                   /* Use thread_loop_f when you want to loop over all face threads (like a geometry face) in a given domain.*/
 	{
-		if (THREAD_ID(tf)==wall_cathode_cathode_drop_f )                        /* Cathode    */
-		{                                                                       /* BOUNDARY_FACE_THREAD_P make sure it is BC face  */
-		    begin_f_loop (f,tf)                                                 /* begin_f_loop and end_f_loop loop over all faces in a given face thread */
-			{
-				if (PRINCIPAL_FACE_P(f,tf))
-			    {		
-					F_AREA(A0,f,tf);                                            /*  to get the face Area vector        */                
-			     	f_shadow=F_SHADOW(f,tf);
-	                tf_shadow=THREAD_SHADOW(tf);	
-
-					AREA=NV_MAG(A0);
-					CellV=C_VOLUME(F_C0(f,tf),THREAD_T0(tf));
-		            CellV_shadow=C_VOLUME(F_C0(f_shadow,tf_shadow),THREAD_T0(tf_shadow));                                           /* tf_shadow is face thread, THREAD_T0(tf_shadow) is the Cell thread*/
-					Area2V=AREA/CellV;              				                                                                /* Area/Volumn  */
-		            Area2V_shadow=AREA/CellV_shadow;
-					ji=0.3*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag);           /* ji is the ion current density       */
-					je=0.7*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag);           /* je is the electron current density  */
+		if (THREAD_ID(tf)==wall_cathode_cathode_drop_f )                    /* Cathode */
+		{                                                                   /* BOUNDARY_FACE_THREAD_P make sure it is BC face*/
+	        energyin=0.22*Current_BC*(VdropC+Vi-PHIc);                      /* Unit for energyin is W */
+	        R= GetArcSpotRadius(energyin);
+            energyout_Qcond = 2*M_PI*R*thermalcond_cu*(TempBoilCu-TempAmbient);   /*energyin= energyout_Qcond+ energyout_Qvap*/
+            energyout_Qvap = LangmuirConstantRate*M_PI*R*R*h_cu; 
+		    begin_f_loop (f,tf)                              /* begin_f_loop and end_f_loop loop over all faces in a given face thread */
+			{	
+			    if (PRINCIPAL_FACE_P(f,tf))
+			    {
+					F_AREA(A0,f,tf);                             /*  to get the face Area vector.                */                
+					CV=C_VOLUME(F_C0(f,tf),THREAD_T0(tf));       /*  obtain the real cell volume for 2D, 3D, and axisymmetric simulations.*/
+					AREA=NV_MAG(A0);                             /*  NV_MAG computes the magnitude of a vector   */
+					Area2V=AREA/CV;                                              /* Area/Volumn                        */
+					ji=0.22*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag);           /* ji is the ion current density      */
+					je=0.78*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag);           /* je is the electron current density */
 					jn=ABS((A0[0]*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jx)+A0[1]*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jy)+A0[2]*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jz))/AREA);
-					
-	                Local_vdrop= C_UDMI(F_C0(f_shadow,tf_shadow),THREAD_T0(tf_shadow),UDM_Vdrop);
-				    energyin=0.3*Current_BC*(Local_vdrop+Vi+0.645);                                                                 /* Unit for energyin is W, 0.645=5Kb/2e*Tc              */
-		            Evap_rate=LangmuirConstantRate*(1.0-C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Cu_mole));                              /* partial pressure = pressure(1 bar) X mole fraction   */
+									
+					F_UDMI(f,tf,UDM_Qion_F)    = energyin*jn/Current_BC;         /*  ji*(VdropC+Vi-PHIc);    5*KB*F_T(f,tf)/2  no more than 0.6, is neglected. How was PHic defined */				
+					F_UDMI(f,tf,UDM_Qe_F)      = je*PHIc;                        /*  not use at all,  electron emission           */
+	                F_UDMI(f,tf,UDM_Qcondcu_F) = energyout_Qcond*jn/Current_BC;  
+	                F_UDMI(f,tf,UDM_Qvapcu_F)  = energyout_Qvap*jn/Current_BC;				
+			    	/* Message("Surface ID= %d, UDM_Qion_F = %f, Jmag=%f  \n", THREAD_ID(tf),F_UDMI(f,tf,UDM_Qion_F),C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag));             */
 
-			        R= GetArcSpotRadius(energyin, Evap_rate);
-	                F_UDMI(f,tf,UDM_Vap2cond_F)=R*Evap_rate*h_cu_mole/(2*thermalcond_cu*(TempBoilCu-TempAmbient));
-
-					F_UDMI(f,tf,UDM_Qion_F)   = ji*(Local_vdrop+Vi+0.645);                                                          /* 0.645=5Kb/2e*Tc*/         				
-					F_UDMI(f,tf,UDM_Qe_F)     = je*PHIc;                                                                            /* jouling heat divided into two part: Qe and Qion. */
-	                F_UDMI(f,tf,UDM_Qvapcu_F) = F_UDMI(f,tf,UDM_Qion_F)*F_UDMI(f,tf,UDM_Vap2cond_F)/(1+F_UDMI(f,tf,UDM_Vap2cond_F));
-	                F_UDMI(f,tf,UDM_Qcondcu_F)= F_UDMI(f,tf,UDM_Qion_F)/(1+F_UDMI(f,tf,UDM_Vap2cond_F));                            /* this part of energy should added into solid      */			  
-
-			    	/* Message("Surface ID= %d, UDM_Qion_F = %f, Jmag=%f  \n", THREAD_ID(tf),F_UDMI(f,tf,UDM_Qion_F),C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag));                        */
-	                C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_ESrootvap) = F_UDMI(f,tf,UDM_Qvapcu_F)*Area2V;                              /* evaporation will absorb some heat, so add the same amount heat source*/
-					C_UDMI(F_C0(f_shadow,tf_shadow),THREAD_T0(tf_shadow),UDM_ESrootcond)= F_UDMI(f,tf,UDM_Qcondcu_F)*Area2V_shadow; /* source term for the solid domain                 */    
-				}						
+					C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_ESion)    = F_UDMI(f,tf,UDM_Qion_F)*Area2V;             /* Hear of ion bambondment, F_C1 does not exist for BC face  */
+					C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_ESe)      = F_UDMI(f,tf,UDM_Qe_F)*Area2V;               /* not useful*/
+					C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_EScondcu) = F_UDMI(f,tf,UDM_Qcondcu_F)*Area2V;          /* The conduction heat lost, that will be substracted from the system*/
+				} 
             }
             end_f_loop (f,tf)            
 		}
 
-		if (THREAD_ID(tf)==wall_anode_anode_drop_f)       /*  Anode  */
+		if (THREAD_ID(tf)==wall_anode_anode_drop_f )       /* Anode */
 		{
+			energyin=Current_BC*(VdropA+PHIa);                                                                                               
+	        R= GetArcSpotRadius(energyin);
+            energyout_Qcond = 2*M_PI*R*R*thermalcond_cu*(TempBoilCu-TempAmbient);
+            energyout_Qvap = LangmuirConstantRate*M_PI*R*R*h_cu; 	
+            
 			begin_f_loop (f,tf)         
-			{
+			{	
 				if (PRINCIPAL_FACE_P(f,tf))
 			    {	
-					F_AREA(A1,f,tf);
-			     	f_shadow=F_SHADOW(f,tf);
-	                tf_shadow=THREAD_SHADOW(tf);
-
-					CellV=C_VOLUME(F_C0(f,tf),THREAD_T0(tf));
-					AREA=NV_MAG(A1);
-					Area2V=AREA/CellV;
-	                CellV_shadow=C_VOLUME(F_C0(f_shadow,tf_shadow),THREAD_T0(tf_shadow));                         /* tf_shadow is face thread, THREAD_T0(tf_shadow) is the Cell thread  */
-	                Area2V_shadow=AREA/CellV_shadow;
+					F_AREA(A1,f,tf);          
+					CV=C_VOLUME(F_C0(f,tf),THREAD_T0(tf));
+					AREA=NV_MAG(A1);                                                                    /*  NV_MAG computes the magnitude of a vector           */
+					Area2V=AREA/CV;  
 					jn=ABS((A1[0]*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jx)+A1[1]*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jy)+A1[2]*C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jz))/AREA);  /*  For normal to the surface, Jmag is too big          */
 
-	                Local_vdrop= C_UDMI(F_C0(f_shadow,tf_shadow),THREAD_T0(tf_shadow),UDM_Vdrop);
-				    energyin=jn/C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Jmag)*Current_BC*(Local_vdrop+PHIa+0.645);   /* unit is J/s                            */
-	                Evap_rate=LangmuirConstantRate*(1.0-C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_Cu_mole));           /* assume the pressure is constant 1 bar  */
-	                R= GetArcSpotRadius(energyin, Evap_rate);                
-	                F_UDMI(f,tf,UDM_Vap2cond_F)=R*Evap_rate*h_cu_mole/(2*thermalcond_cu*(TempBoilCu-TempAmbient));
+					F_UDMI(f,tf,UDM_Qecap_F)   = energyin*jn/Current_BC;                                /*  jn*(PHIa+VdropA);     Qie is the energy associated with electron capture  */
+	                F_UDMI(f,tf,UDM_Qcondcu_F) = energyout_Qcond*jn/Current_BC;                         /*  be careful, need to use Jy not Jmag                                        */
+	                F_UDMI(f,tf,UDM_Qvapcu_F)  = energyout_Qvap*jn/Current_BC;		
 
-					F_UDMI(f,tf,UDM_Qecap_F)   = jn*(Local_vdrop+PHIa+0.645);                                     /* 0.645=5Kb/2e*(Tg-Ta)                        */   
-	                F_UDMI(f,tf,UDM_Qvapcu_F)  = F_UDMI(f,tf,UDM_Qecap_F)*F_UDMI(f,tf,UDM_Vap2cond_F)/(1+F_UDMI(f,tf,UDM_Vap2cond_F));
-	                F_UDMI(f,tf,UDM_Qcondcu_F) = F_UDMI(f,tf,UDM_Qecap_F)/(1+F_UDMI(f,tf,UDM_Vap2cond_F));        /* this part of energy should added into solid */
-				
-	                C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_ESrootvap) = F_UDMI(f,tf,UDM_Qvapcu_F)*Area2V;
-					C_UDMI(F_C0(f_shadow,tf_shadow),THREAD_T0(tf_shadow),UDM_ESrootcond)= F_UDMI(f,tf,UDM_Qcondcu_F)*Area2V_shadow;
+					C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_ESecap)   = F_UDMI(f,tf,UDM_Qecap_F)*Area2V;    /*  heat source for electron capture,F_C1 doesn't exit for boundary layer */			
+					C_UDMI(F_C0(f,tf),THREAD_T0(tf),UDM_EScondcu) = F_UDMI(f,tf,UDM_Qcondcu_F)*Area2V;    				  	
 				}
-			}
-			end_f_loop (f,tf)
-		}
+			}	
+			end_f_loop (f,tf)				
+		}				
 	}
 	#endif
 }
@@ -758,31 +700,33 @@ DEFINE_ADJUST(D_Wall_ablation,d)
 {   /* help/flu_udf/flu_udf_udf_uds_appl.html#flu_udf_udf_uds_p1radiation_application*/
     #if !RP_HOST
 
-	double A[ND_ND],At,Rad_absorbed;
+	double A[ND_ND],At;
 	double dr0[ND_ND],es[ND_ND],ds,A_by_es;   
 	Thread *tf;                          /*= Lookup_Thread(d, Ablative_wall_air);  From the zone_ID(this is a number, not the thread), to find the thread point. */
     face_t f;
 	thread_loop_f (tf, d)                /* Use thread_loop_f when you want to loop over all face threads (like a geometry face) in a given domain.*/
 	{	                                 /* Semi-transport is not BOUNDARY_FACE_THREAD_P */ 
        if (THREAD_ID(tf)==Ablative_wall_air)   
-       {
-			begin_f_loop(f,tf)
-			{
+       {                
+			begin_f_loop(f,tf)   
+			{   
 			  if (PRINCIPAL_FACE_P(f,tf))
 			   {			        /* Semi-transparent no internal emssion*/
 			        BOUNDARY_FACE_GEOMETRY(f,tf,A,ds,es,A_by_es,dr0);   
 					At=NV_MAG(A); 
-					F_UDMI(f,tf,UDM_QWallFlux_F) = -F_STORAGE_R(f,tf,SV_HEAT_FLUX)/At;     /* wall flux = RadFlux + conduction  */
-					F_UDMI(f,tf,UDM_QRadFlux_F) = -F_STORAGE_R(f,tf,SV_RAD_HEAT_FLUX)/At;  /* This is transmitted part.         */
+					F_UDMI(f,tf,UDM_WallFlux) = -F_STORAGE_R(f,tf,SV_HEAT_FLUX)/At;     /* wall flux = RadFlux + conduction  */
+					F_UDMI(f,tf,UDM_RadFlux) = -F_STORAGE_R(f,tf,SV_RAD_HEAT_FLUX)/At;  /* This is transmitted part.         */
 
-                    Rad_absorbed = Absorptivity_wall*F_UDMI(f,tf,UDM_QRadFlux_F);            
-			        if (Rad_absorbed>1e7) Rad_absorbed=1e7;     
+					F_UDMI(f,tf,UDM_QradAblation_F) = Absorptivity_wall*F_UDMI(f,tf,UDM_RadFlux);
+					if (F_UDMI(f,tf,UDM_QradAblation_F)<0)   F_UDMI(f,tf,UDM_QradAblation_F)=0;                    
+			        if (F_UDMI(f,tf,UDM_QradAblation_F)>1e7) F_UDMI(f,tf,UDM_QradAblation_F)=1e7;      
 
-	                F_UDMI(f,tf,UDM_QCondFlux_F)= F_UDMI(f,tf,UDM_QWallFlux_F)-F_UDMI(f,tf,UDM_QRadFlux_F); 
-	                if (F_UDMI(f,tf,UDM_QCondFlux_F)>1e5) F_UDMI(f,tf,UDM_QCondFlux_F)=1e5; 	        
+	                F_UDMI(f,tf,UDM_QCondAblation_F)= F_UDMI(f,tf,UDM_WallFlux)-F_UDMI(f,tf,UDM_RadFlux); 	/*Qcond may be negative.*/ 		        
+			        /*F_UDMI(f,tf,UDM_m_dot_F)=(F_UDMI(f,tf,UDM_QCondAblation_F)+F_UDMI(f,tf,UDM_QradAblation_F)-Stefan_Boltzmann*(pow(WALL_TEMP_INNER(f,tf), 4)-pow(300,4)))/h_pa66;*/
 
-			        F_UDMI(f,tf,UDM_Pa66_rate_F)=(F_UDMI(f,tf,UDM_QCondFlux_F)+Rad_absorbed)/h_pa66;
-					if (F_UDMI(f,tf,UDM_Pa66_rate_F)<0)  F_UDMI(f,tf,UDM_Pa66_rate_F)=0.0;  /* No ablation,  unit is kg/m2/s.  WALL_TEMP_OUTER is the temperature inside the wall */  	 
+			        F_UDMI(f,tf,UDM_m_dot_F)=(F_UDMI(f,tf,UDM_QCondAblation_F)+F_UDMI(f,tf,UDM_QradAblation_F))/h_pa66;
+			        /*if ((WALL_TEMP_OUTER(f,tf)+WALL_TEMP_INNER(f,tf))/2<TempMeltPa66 || F_UDMI(f,tf,UDM_m_dot_F)<0)  F_UDMI(f,tf,UDM_m_dot_F)=0.0;*/
+					if (F_UDMI(f,tf,UDM_m_dot_F)<0)  F_UDMI(f,tf,UDM_m_dot_F)=0.0;  /* No ablation,  unit is kg/m2/s.  WALL_TEMP_OUTER is the temperature inside the wall */  	 
 			    }
 			 }  
 			end_f_loop(f,tf)			
@@ -800,6 +744,19 @@ DEFINE_PROFILE(Current_input,tf,position)
 	}
 	end_f_loop(f,tf) 
 }
+
+DEFINE_PROFILE(Rad_absorption_ablation,tf,i)
+{
+    #if !RP_HOST
+    face_t f;
+    begin_f_loop(f,tf)
+      {
+        /*if (PRINCIPAL_FACE_P(f,tf))   F_PROFILE(f,tf,i) = F_UDMI(f,tf,UDM_QradAblation_F)/Ablation_Wall_thickness;*/
+        if (PRINCIPAL_FACE_P(f,tf))   F_PROFILE(f,tf,i) = 0.0;
+      }
+    end_f_loop(f,tf)
+	#endif    
+} 
 
 DEFINE_PROPERTY(air_visc_GEtable,cell,thread)                            
 {   /*  specify a custom material property in ANSYS Fluent for single-phase and multiphase flows. */   
@@ -856,14 +813,14 @@ DEFINE_DIFFUSIVITY(Air_Econd,cell,thread,i)
 	if(Ysh[2]>30000.0) Ysh[2]=30000.0;
 	Ysh[3]=(C_P(cell,thread)+ P0fl )/101325.0;
 	C_UDMI(cell,thread,UDM_ECond)= FindApproximation(Ysh,&table,Num_Sigma);
-	if(C_UDMI(cell,thread,UDM_ECond)<SIGMA_MIN) return SIGMA_MIN;
-    return C_UDMI(cell,thread,UDM_ECond);    
+	if(C_UDMI(cell,thread,UDM_ECond)<SIGMA_MIN*Econd_adjust) return SIGMA_MIN*Econd_adjust;
+    return C_UDMI(cell,thread,UDM_ECond)*Econd_adjust;    
 }
 
 DEFINE_DIFFUSIVITY(Mixture_Econd,cell,thread,i)                       
 {                                                                                  /* i is the index that identifies the species or user-defined scalar */
-	if(C_UDMI(cell,thread,UDM_ECond)<SIGMA_MIN) return SIGMA_MIN;
-	return C_UDMI(cell,thread,UDM_ECond);                             /* this was calculated by the B_Sigma_update */
+	if(C_UDMI(cell,thread,UDM_ECond)<SIGMA_MIN*Econd_adjust) return SIGMA_MIN*Econd_adjust;
+	return C_UDMI(cell,thread,UDM_ECond)*Econd_adjust;                             /* this was calculated by the B_Sigma_update */
 }
 
 /* UDS Source Term */
@@ -906,7 +863,8 @@ DEFINE_SOURCE(Lorentz_Fz,cell,thread,dS,eqn)
 
 DEFINE_SOURCE(ES_solid_copper,cell,thread,dS,eqn)         
 {   /* ESion ESe ESecap was not defined in solid region. */
-	C_UDMI(cell, thread, UDM_ESCurrent)=pow(C_UDMI(cell,thread,UDM_Jmag), 2.)/C_UDSI_DIFF(cell,thread,UDS_V)+C_UDMI(cell,thread,UDM_ESrootcond); 
+
+	C_UDMI(cell, thread, UDM_ESCurrent)=C_UDMI(cell, thread, UDM_ESion)+C_UDMI(cell, thread, UDM_ESecap)+pow(C_UDMI(cell,thread,UDM_Jmag), 2.)/C_UDSI_DIFF(cell,thread,UDS_V); 
 	dS[eqn]=0;
 	return C_UDMI(cell, thread, UDM_ESCurrent);
 }
@@ -916,26 +874,26 @@ DEFINE_SOURCE(ES_Joule_heating,cell,thread,dS,eqn)
 	C_UDMI(cell,thread,UDM_ESCurrent) = pow(C_UDMI(cell,thread,UDM_Jmag), 2.)/C_UDSI_DIFF(cell,thread,UDS_V);     /* C_UDSI_DIFF is to  electrical conductivity*/	
 	dS[eqn]=0;
 	if (C_UDMI(cell,thread,UDM_ESCurrent)>Maximum_energy_source)  return Maximum_energy_source;
-    return C_UDMI(cell,thread,UDM_ESCurrent);
+    return C_UDMI(cell,thread,UDM_ESCurrent); 
 }
 
 DEFINE_SOURCE(ES_anode_drop,cell,thread,dS,eqn)           
 {   
-	C_UDMI(cell, thread, UDM_ESCurrent)=C_UDMI(cell,thread,UDM_ESrootvap);
+	C_UDMI(cell, thread, UDM_ESCurrent)=C_UDMI(cell, thread, UDM_ESecap);
 	dS[eqn]=0;
 	if (C_UDMI(cell,thread,UDM_ESCurrent)>Maximum_energy_source)  return Maximum_energy_source;
-	return 0.0;
-}
+	return C_UDMI(cell,thread,UDM_ESCurrent); 
+} 
 
 DEFINE_SOURCE(ES_cathode_drop,cell,thread,dS,eqn)        
 {                                                                        
-    C_UDMI(cell, thread, UDM_ESCurrent) = C_UDMI(cell,thread,UDM_ESrootvap);	
+    C_UDMI(cell, thread, UDM_ESCurrent) = C_UDMI(cell, thread, UDM_ESion);	
 	dS[eqn]=0;
 	if (C_UDMI(cell,thread,UDM_ESCurrent)>Maximum_energy_source)  return Maximum_energy_source;
-	return 0.0;
+	return C_UDMI(cell,thread,UDM_ESCurrent); 
 }
 
-DEFINE_GRAY_BAND_ABS_COEFF(gray_band_abs_air,cell,thread,nb)                             
+DEFINE_GRAY_BAND_ABS_COEFF(gray_band_abs_air,cell,thread,nb)                              
 {                                                   /* For the gray band absorption coefficient as a function of temperature, used with a non-gray discrete ordinates model. */
 	double abs_coeff = 0.0;
 	switch (nb)
@@ -951,17 +909,19 @@ DEFINE_GRAY_BAND_ABS_COEFF(gray_band_abs_air,cell,thread,nb)
 }
 
 DEFINE_GRAY_BAND_ABS_COEFF(gray_band_abs_GEtable,cell,thread,nb)
-{  
-	return InterpolateAbsorptionCoefficient(C_T(cell, thread), C_P(cell, thread), C_YI(cell,thread,I_Cu),C_YI(cell,thread,I_Air),C_YI(cell,thread,I_Pa66),nb);
+{
+  
+    return InterpolateAbsorptionCoefficient(C_T(cell, thread), C_P(cell, thread), C_YI(cell,thread,I_Cu),C_YI(cell,thread,I_Air),C_YI(cell,thread,I_Pa66),nb);
+  /*return 100;  */
 }
 
-DEFINE_SR_RATE(SR_cu_pa66,f,tf,r,mw,yi,rr)                                
+DEFINE_SR_RATE(SR_cu_pa66,f,tf,r,mw,yi,rr)                                /* unit for rr should be Kmol/m^2/s */
 {
     #if !RP_HOST	
     if (STREQ(r->name, "pa66-reaction"))
     {
-      F_UDMI(f,tf,UDM_SR_rate) = F_UDMI(f,tf,UDM_Pa66_rate_F)/mw[0];    /* unit of SR_rate is kmol/m2-s for the surface reactions  help/flu_udf/flu_udf_sec_define_net_reaction_rate.html*/
-      *rr =  0.0;                                                       /* F_UDMI(f,tf,UDM_SR_rate); 	*/
+      F_UDMI(f,tf,UDM_SR_rate) = F_UDMI(f,tf,UDM_m_dot_F)/mw[0];   
+      *rr =  0.0; /* F_UDMI(f,tf,UDM_SR_rate); 	*/
     }
     else if(STREQ(r->name, "cu-reaction"))
     {
