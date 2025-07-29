@@ -1,4 +1,4 @@
-# Multiphyscs modelling of thermal plasma: Scripting + Fluent Solver + UDF
+# Video Generation by Pure Multiphyscs modelling of thermal plasma by PDE solver + tools
 
 
 ## Contributor
