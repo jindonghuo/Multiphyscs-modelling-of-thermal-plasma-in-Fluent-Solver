@@ -1,4 +1,4 @@
-# Video Generation by Pure Multiphyscs modelling of thermal plasma by PDE solver + tools
+# Video by Multiphyscs modelling of thermal plasma by PDE solver + tools
 
 
 ## Contributor
