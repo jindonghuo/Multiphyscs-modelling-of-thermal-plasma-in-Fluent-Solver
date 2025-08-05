@@ -1,4 +1,4 @@
-# Video by Multiphyscs modelling of thermal plasma by PDE solver + tools
+# Multiphyscs modelling of thermal plasma by PDE solver + tools
 
 
 ## Contributor
