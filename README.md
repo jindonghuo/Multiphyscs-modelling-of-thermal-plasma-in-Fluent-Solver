@@ -16,8 +16,9 @@ Jindong Huo, main contributor. Great thanks to Eirc Lab, UConn.
 * For chemical non-equilibrium, additional species transport equations are needed to capture the gas dissociation/ionization process (normally for argon, nitrogn, not for air because air has too many reaction species).
 
 ## Description
-This project can launch in both Windows and Linux System. It is script-based modelling setup, instead of GUI, to have an effecient debugging as well as parameter study/optimization. Debugging for Physics-based modelling requires calibration from experimental results, not just the Syntax issues. The scripting-based modelling should be executed in batch mode if need.
-* The UDF code, main_udf.c, is parallized.
+This project supports both Windows and Linux environments. It adopts a script-based modeling workflow (instead of GUI-driven setup) to enable efficient debugging, automation, and large-scale parameter studies/optimization.
+Physics-based modeling requires iterative calibration against experimental data—not just resolving syntax issues—making scripting essential for reproducibility and batch execution.
+* The UDF implementation (main_udf.c) is parallelized for improved performance.
 * The python script first checks the platform, Linux or Windoes, then writes the Fluent journal file, and then run fluent journal file to compile UDF and setup the model.
 * The fluent journal file will read the mesh, load UDF, import/interpolate the gas transport/thermodynamic properties and finally submit the fluent job.
 * During the running, the script will export the simulation results as figures, like current denstiy, temperature and potential field, at end of each timestep.
